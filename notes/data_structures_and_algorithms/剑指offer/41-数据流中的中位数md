@@ -1,0 +1,117 @@
+# 41-数据流中的中位数
+
+**题目描述**
+
+如何得到一个数据流中的中位数？如果从数据流中读出奇数个数值，那么中位数就是所有数值排序之后位于中间的数值。如果从数据流中读出偶数个数值，那么中位数就是所有数值排序之后中间两个数的平均值。
+
+**思路分析：**
+
+- 没有排序的数组（数组 + partition）
+
+  - 插入：O(1)
+  - 查找：O(n)
+
+- 排序的数组
+
+  - 插入：O(n)
+  - 查找：O(1)
+
+- 排序的链表（双指针指向中位数）
+
+  - 插入：O(n)
+  - 查找：O(1)
+
+- 二叉搜索树
+
+  - 插入：平均O(logn)，最差O(n)
+  - 查找：平均O(logn)，最差O(n)
+
+- AVL树（需要额外的空间记录左右子树的差）
+
+  - 插入：O(logn)
+  - 查找：O(1)
+
+- 最大堆和最小堆（**最好的实现方式**）
+
+  - 插入：O(logn)
+  - 查找：O(1)
+
+1. 使用最大堆和最小堆实现，是最大堆和最小堆的数量相等，最小堆存储较大的数，最大堆存储较小的数，中位数为堆顶两元素之一或者平均值。
+2. 若当前已有数为偶数，目前数为奇数时，默认插入最小堆，当新数比最大堆的数还小，将这个数插入最大堆，将最大堆的堆顶元素插入最小堆，当前已有数为奇数同理。
+3. 当为奇数时，中位数为最小堆的堆顶元素。
+
+- 实现代码中使用了堆的几个函数，参考[STL--heap概述：make_heap,sort_heap,pop_heap,push_heap](http://www.cnblogs.com/likui360/p/6364896.html)，在头文件<algorithm>中。
+- 几种函数的具体声明：
+  1. `vector<int> v`;
+  2. 最大堆：`make_heap(v.begin(), v.end(), less<int>())`; 默认情况
+  3. 最小堆：`make_heap(v.begin(), v.end(), greater<int>())`;
+  4. `pop_heap(v.begin(), v.end(), less<int>())`：将堆顶元素放到数组末尾，并重新建堆，取堆顶元素时用到
+  5. `push_heap(v.begin(), v.end(), less<int>())`：在`v.push_back(99)`后，重新建堆
+
+**具体实现：**
+
+```c++
+class Solution {
+public:
+    void Insert(int num)
+    {
+        //已为偶数，添加为奇数，添加到最小堆
+        if(((max.size() + min.size()) & 1) == 0){
+            if(max.size() > 0 && num < max[0]){
+                max.push_back(num);
+                push_heap(max.begin(), max.end(), less<int>());
+                
+                num = max[0];
+                
+                pop_heap(max.begin(), max.end(), less<int>());
+                max.pop_back();
+            }
+            min.push_back(num);
+            push_heap(min.begin(), min.end(), greater<int>());
+        }
+        //奇数，添加到最大堆
+        else{
+            if(min.size() > 0 && num > min[0]){
+                min.push_back(num);
+                push_heap(min.begin(), min.end(), greater<int>());
+                
+                num = min[0];
+                
+                pop_heap(min.begin(), min.end(), greater<int>());
+                min.pop_back();
+            }
+            max.push_back(num);
+            push_heap(max.begin(), max.end(), less<int>());
+        }
+    }
+
+    double GetMedian()
+    { 
+        int size = min.size() + max.size();
+        //考虑特殊情况
+        if(size == 0){
+            return -1;
+        }
+        
+        int isEven = size & 1;
+        if(isEven){
+            return static_cast<double>(min[0]);
+        }
+        else{
+            //注意int转double
+            //整除，注意加2.0
+            return static_cast<double>((max[0] + min[0]) / 2.0);
+        }
+    }
+private:
+    //切勿忘记定义最大堆，最小堆
+    vector<int> min;
+    vector<int> max;
+};
+```
+
+
+
+
+
+  
