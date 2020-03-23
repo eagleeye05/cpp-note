@@ -1,4 +1,5 @@
 # 1. 知识点总结
+
 ## 1.1 数据结构与算法
 
 > [LeetCode](https://github.com/eagleeye05/LeetCode)
@@ -10,12 +11,26 @@
 > [数据结构](notes/data_structures_and_algorithms/数据结构.md)
 
 > [查找算法](notes/data_structures_and_algorithms/查找算法.md)：二分查找
+>
+> [排序算法](notes/data_structures_and_algorithms/排序算法.md)
 
 ## 1.2 网络
 
 [计算机网络  自顶向下方法](notes/network/计算机网络.md)
 
+## 1.3 操作系统
 
+[操作系统 精髓与设计原理](notes/system/操作系统.md)
+
+[Linux高性能服务器](notes/system/Linux高性能服务器.md)
+
+[深入理解计算机系统](notes/system/深入理解计算机系统.md)
+
+## 1.4 C++
+
+[C++ Primer](notes/language/C++ Primer.md)
+
+[STL源码剖析](notes/language/STL源码剖析.md)
 
 # 2. 面试题总结
 
