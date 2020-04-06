@@ -20,11 +20,15 @@
 
 ## 1.3 操作系统
 
+[Linux常用命令](notes/system/Linux常用命令.md)
+
 [操作系统 精髓与设计原理](notes/system/操作系统.md)
 
-[Linux高性能服务器](notes/system/Linux高性能服务器.md)
+[Unix环境编程](notes/system/Unix环境编程.md)
 
-[深入理解计算机系统](notes/system/深入理解计算机系统.md)
+> [Linux高性能服务器](notes/system/Linux高性能服务器.md)
+
+> [深入理解计算机系统](notes/system/深入理解计算机系统.md)
 
 ## 1.4 C++
 
@@ -32,8 +36,22 @@
 
 [STL源码剖析](notes/language/STL源码剖析.md)
 
+[深入理解C++对象模型](notes/language/深入理解C++对象模型.md)
+
 # 2. 面试题总结
 
 ## 2.1 数据结构与算法
 
-## 2.2 网络
+## 2.2  C++
+
+[C++ ](notes/interview/language/C++.md)
+
+## 2.3 网络
+
+## 2.4 操作系统
+
+## 2.5 其它
+
+[bookmarks](notes/interview/bookmarks.md)
+
+  
