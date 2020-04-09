@@ -314,4 +314,302 @@ STL标准规定分配器定义于`<memory>`中，SGI`<memory>`内含两个文件
 
 SGI对内存分配与释放的涉及哲学如下：
 
-- 
+- 向system heap申请空间
+- 考虑多线程状态
+- 考虑内存不足时的应变措施
+- 考虑过多“小型区块”可能造成的内存碎片问题（**SGI设计了双层级分配器**）
+
+C++的内存分配的基本操作是::operator new()，内存释放的基本操作是::operator delete()。这两个全局函数相当于C的malloc()和free()。SGI正是以malloc()和free()完成内存的分配与释放
+
+**双层及配置器：**
+
+考虑到小型区块所可能造成的内存碎片问题，SGI设计了双层级分配器：
+
+- **第一级分配器**
+
+  - 直接使用malloc()和free()
+
+- **第二级分配器**：视情况采用不同的策略
+
+  - 当分配区块超过128bytes时，视为“足够大”，调用第一级分配器
+  - 当分配区块小于128bytes时，视为“过小”，为了降低额外负担，采用复杂的memory pool整理方式，不再求助于第一级分配器
+
+  ![image-20200407105300264](../../pics/image-20200407105300264.png)
+
+整个设计究竟只开放第一级配置器，或是同时开放第二级配置器，取决于**__USE_MALLOC**是否被定义（定义则只开放第一级配置器）
+
+无论alloc被定义为第一级或第二级分配器，SGI还为它再包装一个接口，使分配器的接口能够符合STL规格： 
+
+```C++
+//Alloc传入的是配置器的类型（一级或二级）
+template<class T, class Alloc>
+class simple_alloc{
+public:
+    static T *allocate(size_t n)
+    			{ return 0 == n ? 0 : Alloc::allocate(n * sizeof (T));}
+    static T *allocate(void)
+                { return (T*) Alloc::allocate(sizeof (T)); }
+    static void deallocate(T *p, size_t n)
+    			{ if(0 != n) Alloc::deallocate(p, n * sizeof(T));}
+    static void deallocate(T *p)
+                { Alloc::deallocate(p, sizeof (T)); }
+}
+```
+
+内部四个成员函数其实都是单纯的转调用，调用传递给配置器（一级或二级）的成员函数，**这个接口使分配器的分配单位从bytes转为个别元素的大小**。SGI STL容器全部使用这个simple_alloc接口，如图：
+
+![image-20200407110028357](../../pics/image-20200407110028357.png)
+
+#### 2.2.5 第一级配置器_malloc_alloc_template剖析
+
+源码分析：
+
+第一级分配器_malloc_alloc_template定义在头文件<stl_alloc.h>中：
+
+[_malloc_alloc_template的实现](STL源码剖析/_malloc_alloc_template.md)
+
+- 1. 第一级配置器以malloc(), free(), realloc()等C函数执行实际的内存分配、释放、重分配操作；
+- 2. 实现类似C++ new-handler的机制
+     - 由于SGI以malloc而非::operator new来配置内存，因此SGI不能直接使用C++的set_new_handler()，必须仿真一个类似的函数
+     - **C++ new handler机制**：可以要求系统在内存分配需求无法满足时，调用一个你所指定的函数。换句话说，一旦::operator new无法完成任务，在丢出std::bad_alloc异常状态之前，会先调用由客户指定的处理例程，该处理例程通常即被称为new-handler
+- 3. oom_malloc和oom_realloc：循环调用“内存不足处理例程”，期望在某次调用之后，获得足够的内存而圆满完成任务。如果“内存不足处理例程”未被客端设定，这两个函数便不客气的调用_THROW_BAD_ALLOC丢出**bad_alloc**异常信息，或利用exit(1)终止程序
+
+#### 2.2.6 **第二级配置器 _default_alloc_template剖析**
+
+第二级分配器多了一些机制，避免太多小额区块造成内存的碎片，小额区块带来的问题：
+
+- 1. 产生内存碎片
+- 2. 配置时的额外负担：额外负担是一些区块信息，用以管理内存。区块越小，额外负担所占比例越大，越显浪费
+
+![image-20200407112751702](../../pics/image-20200407112751702.png)
+
+SGI第二级配置器的做法：
+
+- 1. **大区块：**区块大于128bytes时
+     - 移交第一级配置器处理
+- 2. **小额区块：**当区块小于等于128bytes时
+     - 以**内存池管理（也称为次层配置）**
+       - 每次分配一大块内存，并维护对应的自由链表（free-list)，下次若有相同大小的内存需求，就直接从free-list中拔出。如果客户释放小额区块，就有分配器回收到free-list中
+       - **维护有16个free-list**，各自管理大小分别为8,16,24,32,40,48,56,64,72,80,88,96,104,112,120,128bytes的小额区块
+       - SGI第二级分配器会主动将任何小额区块的内存需求量上调至8的倍数（例如客户要求30bytes，就自动调整为32bytes）
+
+**free-list节点结构**：
+
+```c++
+union obj{
+    union obj * free_list_link; //系统视角
+    char client_data[1];        //用户视角
+}
+```
+
+为了维护链表，每个节点需要额外的指针（指向下一个节点），解决办法：使用union
+
+- 从obj的第一字段观之，obj可被视为一个指针，指向相同形式的另一个obj
+- 从obj的第二字段观之，obj可视为一个指针，指向实际区块
+
+![](../../pics/img-2-4-%E8%87%AA%E7%94%B1%E9%93%BE%E8%A1%A8%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%8A%80%E5%B7%A7.png)
+
+**源码分析**：
+
+第二级分配器__default_alloc_template定义在头文件<stl_alloc.h>中：
+
+[__default_alloc_template的实现](STL源码剖析/_default_alloc_template.md)
+
+#### 2.2.7 空间配置函数 allocate()
+
+函数做法：
+
+- 1. 若区块大于128bytes，就调用第一级分配器
+- 2. 若区块小于128bytes，就检查对应的free-list
+     - 若free-list之内有可用的区块，则直接使用
+     - 若free-list之内没有可用的区块，将区块大小调至8倍数边界，调用refill()，准备为free-list重新填充空间
+
+**源码分析**
+
+allocate()定义在头文件<stl_alloc.h>中
+
+[allocate()实现](STL源码剖析/allocate().md)
+
+#### 2.2.8 空间是释放函数deallocate()
+
+函数做法：
+
+- 1. 若区块大于128bytes，就调用第一级分配器
+- 2. 若区块小于128bytes，找出对应的free-list，将区块回收
+
+**源码分析**
+
+deallocate()定义在头文件<stl_alloc.h>中
+
+[deallocate()实现](STL源码剖析/deallocate().md)
+
+![image-20200407132906581](../../pics/image-20200407132906581.png)
+
+#### 2.2.9 重新填充函数refill()
+
+allocate()发现free_list中没有可用块区了，就调用refill()，准备为free_list重新填充空间。新的空间将取自内存池（由chunk_alloc()完成）。缺省取得20个节点新区块，内存池空间不足时，获得的节点数可能小于20
+
+**源码分析**：
+
+refill()定义在头文件<stl_alloc.h>中
+
+[refill()实现](STL源码剖析/refill().md)
+
+#### 2.2.10 内存池 chunk_alloc()
+
+该函数的工作：从内存池中去除空间给free_list使用
+
+**函数思路**：
+
+chunk_alloc()从内存池申请空间，根据`end_free-start_free`判断内存池中的空间
+
+- 如果剩余空间充足
+
+  - 直接调出20个区块返回给free-list
+
+- 如果剩余空间不足以提供20个区块，但足够供应至少1个区块
+
+  - 拨出这不足20个区块的空间（能分配多少区块，就分配多少区块）
+
+- 如果剩余空间连一个区块都没有
+
+  - 试着让内存池的残余零头还有利用价值，分配给适当的free-list
+
+  - 利用malloc()从heap中分配内存（大小为需求量的2倍，加上一个随着分配次数增加而越来越大的附加量），为内存池注入新的可用空间
+
+    - 如果malloc()获取失败，chunk()就四处寻找有无“尚有且未用区块足够大”的free-list（大小为[size,128]的free-list）。找到了就挖出一块交出。递归调用自身
+
+    - 如果上一步仍为失败，就调用第一级分配器，第一级分配器有out-of-memory处理机制，或许有机会释其它的内存拿来此处使用。如果可以，就成功，否则，抛出bad_alloc异常
+
+  - 如果上面的步骤找到一定的空间，则递归调用自身
+
+**源码分析：**
+
+chunk_alloc()定义在头文件<stl_alloc.h>中
+
+[chunk_alloc()实现](STL源码剖析/chunk_alloc().md)
+
+**例子**：
+
+- 1.一开始，客端调用chunk_alloc(32,20)，于是malloc()分配40个32bytes区块，其中==第1个交出==，另19个交给free-list[3]维护，余20个留给内存池 
+- 2.接下来客户调用chunk_alloc(64,20)，此时free_list[7]空空如也，必须向内存池申请。内存池只能供应(32*20)/64=10个64bytes区块（步骤1中剩余的），就把这10个区块返回，第1个交给客户，余9个由free_list[7]维护 
+- 3.此时内存池全空。接下来再调用chunk_alloc(96,20)，此时free-list[11]空空如也，必须向内存池申请。而内存池此时也为空，于是以malloc()分配40+n(附加量)个96bytes区块，其中第1个交出，另19个交给free-list[11]维护，余20+n(附加量)个区块留给内存池... 
+
+<img src="../../pics/image-20200408101621812.png" alt="image-20200408101621812"  />
+
+### 2.3 内存基本处理工具
+
+STL定义了5个全局函数，作用于为初始化空间之上：
+
+- 1. construct()
+- 2. destory()
+- 3. uninitialized_copy()，对应高层函数copy()
+- 4. uninitialized_fill()，对应高层函数fill()
+- 5. uninitialized_fill_n()，对应于高层函数fill_n()
+
+本节分析后3个函数，如果要使用后3个函数，应该包含[<memory>](../../source/STL/g++/memory)，但SGI把它们实际定义于<stl_uninitialized.h>
+
+一些需要提前知道的知识:**POD**
+
+POD意指Plain Old Data，也就是标量类型（scalar types）或传统的C struct类型。 POD类型必然拥有trivial ctor/dtor/copy/assignment函数。因此POD类型采用最有效的初始值填写手法，而对non-POD类型采取最保险的做法。
+
+![image-20200408104406926](../../pics/image-20200408104406926.png)
+
+#### 2.3.1 unintialized_copy
+
+```c++
+template<class InputIterator, class ForwardIterator>
+inline ForwardIterator
+  uninitialized_copy(InputIterator first, InputIterator last, ForwardIterator result);
+```
+
+**三个参数**：
+
+- 1.迭代器first：指向输入端的起始位置
+- 2.迭代器last：指向输入端的结束位置（前闭后开区间）
+- 3.迭代器result：指向输出端（欲初始化空间）的起始处
+
+uninitialized_copy将内存的配置与对象的构建分离开（本函数完成“构造行为”），如果作为输出目的地的[result, result+(last-first))范围内的每一个迭代器i都未初始化，该函数会调用`construct(&*(result+(i-first)),*i)`，产生*i的复制品，放置于输出范围的相对位置上
+
+uninitialized_copy的**用处**：容器的全区间构造函数通常调用该函数完成，具体过程如下：
+
+- 1. 配置内存区块，足以容纳范围内的所有元素
+- 2. 使用uninitialized_copy()，在该内存区块上构造元素
+
+uninitialized_copy具有**commit or rollbak语意**：要么构造所有元素，要么不构造任何元素，如果任何一个拷贝构造函数丢出异常，必须能够将所有元素析构掉
+
+**uninitialized_copy源码分析**：
+
+```
+uninitialized_copy
+	---> __uninitialized_copy //判断first是否为POD
+		---> __uninitialized_copy_aux(...,__true_type) //first为POD
+			---> copy(first, last, result);//交给高阶函数执行，STL的copy()
+		---> __uninitialized_copy_aux(...,false_type) //first不是POD
+			---> construct(&*cur, *first);
+uninitialized_copy(const char* first,...) //针对first为char*的特化版本
+uninitialized_copy(const wchar_t* first,...) //针对first为wchar_t*的特化版本
+```
+
+[uninitialized_copy()的实现](STL源码剖析/uninitialized_copy().md)
+
+#### 2.3.2 uninitialized_fill
+
+```c++
+template <class ForwardIterator, class T>
+inline void uninitialized_fill(ForwardIterator first, ForwardIterator last, const T& x);
+```
+
+**三个参数**：
+
+- 1.迭代器first：指向输出端（欲初始化空间）的起始处
+- 2.迭代器last：指向输出端（欲初始化空间）的结束处（前闭后开区间）
+- 3.x：表示初值
+
+uninitialized_fill将内存的配置与对象的构造行为分离开（本函数完成“构造行为”），如果作为输出目的地的[first, last)范围内的每一个迭代器i都未初始化，该函数会调用`construct(&*i,x)`，在i所指之处产生x的复制品
+
+uninitialized_fill具有**commit or rollbak语意**：要么构造所有元素，要么不构造任何元素，如果任何一个拷贝构造函数丢出异常，必须能够将所有元素析构掉
+
+**uninitialized_fill源码分析**：
+
+```
+uninitialized_fill
+	---> __uninitialized_fill //判断first是否为POD
+		---> __uninitialized_fill_aux(...,__true_type) //first为POD
+			---> fill(first, last, x);//交给高阶函数执行，调用STL算法fill()
+		---> __uninitialized_fill_aux(...,false_type) //first不是POD
+			---> construct(&*cur, x);
+```
+
+[uninitialized_fill()的实现](STL源码剖析/uninitialized_fill().md)
+
+### 2.3.3 uninitialized_fill_n
+
+```c
+template <class ForwardIterator, class Size, class T>
+inline ForwardIterator uninitialized_fill_n(ForwardIterator first, Size n,const T& x);
+```
+
+**三个参数**：
+
+- 1.迭代器first：指向初始化空间的起始处
+- 2.n：表示欲初始化空间的大小
+- 3.x：表示初值
+
+uninitialized_fill_n将内存的配置与对象的构造行为分离开（本函数完成“构造行为”）。该函数为指定范围内的所有元素设定相同的初值。如果[first, first+n)范围内的每一个迭代器i都未初始化，该函数会调用`construct(&*i,x)`，在i所指之处产生x的复制品
+
+uninitialized_fill_n具有**commit or rollbak语意**：要么构造所有元素，要么不构造任何元素，如果任何一个拷贝构造函数丢出异常，必须能够将所有元素析构掉
+
+**uninitialized_fill_n源码分析**：
+
+```
+uninitialized_fill_n
+	---> __uninitialized_fill_n //判断first是否为POD
+		---> __uninitialized_fill_n_aux(...,__true_type) //first为POD
+			---> fill_n(first, n, x);//交给高阶函数执行
+		---> __uninitialized_fill_n_aux(...,false_type) //first不是POD
+			---> construct(&*cur, x);
+```
+
+## 第三章 迭代器概念与traits编程技法
+

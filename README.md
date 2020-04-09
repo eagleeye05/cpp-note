@@ -2,17 +2,17 @@
 
 ## 1.1 数据结构与算法
 
-> [LeetCode](https://github.com/eagleeye05/LeetCode)
+[LeetCode](https://github.com/eagleeye05/LeetCode)
 
-> [剑指offer](notes/data_structures_and_algorithms/剑指offer.md)
+[剑指offer](notes/data_structures_and_algorithms/剑指offer.md)
 
-> [算法题目](notes/data_structures_and_algorithms/算法题目.md)
+[算法题目](notes/data_structures_and_algorithms/算法题目.md)
 
-> [数据结构](notes/data_structures_and_algorithms/数据结构.md)
+[数据结构](notes/data_structures_and_algorithms/数据结构.md)
 
-> [查找算法](notes/data_structures_and_algorithms/查找算法.md)：二分查找
->
-> [排序算法](notes/data_structures_and_algorithms/排序算法.md)
+[查找算法](notes/data_structures_and_algorithms/查找算法.md)：二分查找
+
+[排序算法](notes/data_structures_and_algorithms/排序算法.md)
 
 ## 1.2 网络
 
@@ -26,9 +26,9 @@
 
 [Unix环境编程](notes/system/Unix环境编程.md)
 
-> [Linux高性能服务器](notes/system/Linux高性能服务器.md)
+[深入理解计算机系统](notes/system/深入理解计算机系统.md)
 
-> [深入理解计算机系统](notes/system/深入理解计算机系统.md)
+> [Linux高性能服务器](notes/system/Linux高性能服务器.md)
 
 ## 1.4 C++
 
