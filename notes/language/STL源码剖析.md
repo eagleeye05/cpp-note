@@ -955,3 +955,569 @@ vector<int>::iterator ivite;
 vector<int>::iterator svite;
 ```
 
+### 4.2.4 vector的数据结构
+
+> 数据结构
+
+**数据结构**：vector采用连续线性空间，以两个迭代器start和finish分别指向配置来的连续空开中目前已经被使用的范围，以迭代器end_of_sotrage指向整块连续空间（含备用空间）的尾端
+
+**容量**：为了降低配置空间时的速度成本，vector实际配置大小可能比客户端的需求量更大一点，以备将来可能的扩充。一旦**容量**等于**大小**，便是**满载**，下次再有新增元素，整个vector就得另觅居所
+
+```c++
+class vector {
+    iterator start;
+    iterator finish;
+    iterator end_of_storage;
+};
+```
+
+> 大小容量相关函数
+
+运用start，finish，end_of_storage三个迭代器，提供首位迭代器、大小、容量、空容器判断、[]运算、最前端元素、最后端元素值等功能
+
+```c++
+class vector {
+public:
+  iterator begin() { return start; }
+  iterator end() { return finish; } 
+  size_type size() const { return size_type(end() - begin()); }
+  size_type capacity() const { return size_type(end_of_storage - begin()); }
+  bool empty() const { return begin() == end(); }
+  reference operator[](size_type n) { return *(begin() + n); }
+  reference front() { return *begin(); }
+  reference back() { return *(end() - 1); }
+}；
+```
+
+![image-20200413101144672](../../pics/image-20200413101144672.png)
+
+### 4.2.6 vector的元素操作
+
+- 1.push_back
+- 2.pop_back
+- 3.erase
+- 4.clear
+- 5.insert
+
+> **1.push_back**
+
+push_back()将新元素插入于vector尾端时，该函数首先检查是否有备用空间
+
+- 如果有，直接在备用空间上构造元素，并调整迭代器finish，使vector变大
+- 如果没有，扩充空间：重新配置，移动数据，释放原空间
+
+**分配过程:**
+
+- 1.计算新空间，配置原则：
+  - 如果原空间大小为0，则配置1个元素大小
+  - 如果原空间大小不为0，则配置原大小的两倍
+  - 前半段用来放置原数据，后半段准备用来放置新数据
+- 2.进行空间配置
+- 3.将原vector的内容拷贝到新vector
+- 4.构造新元素，放入vector中
+- 5.释放原vector
+- 6.更新start，finish，end_of_storage迭代器
+
+[push_back()的实现](STL源码剖析/vector-push_back().md)
+
+> 为什么成倍扩充？扩充为什么是1-2倍？
+>
+> [参考博客]:https://blog.csdn.net/wiley_Z/article/details/79210286
+
+**注意：**
+
+- 1.动态增加并不是在原空间之后接续新空间（因为无法保证原空间之后尚有可配置的空间），而是以原大小的两倍另外配置一块较大的空间
+- 2.对于vector的任何操作，一旦引起**空间重新配置**，指向原vector的所有迭代器就都失效了
+
+> **2.pop_back()**
+
+```C++
+//将为元素拿掉，并调整大小
+void pop_back() {
+    //将尾端标记前移一格，表示将放弃尾端元素
+    --finish；
+    destory(finish);
+}
+```
+
+> **3.erase()**
+
+两个重载版本
+
+**版本1 erase(first, last)**
+
+![image-20200414143606011](../../pics/image-20200414143606011.png)
+
+```c++
+//清除[first,last)中的元素
+iterator erase(iterator first, iterator last) {
+  //copy三个参数分别是：源起始位置、源终止位置（不包含）、目的起始位置
+  //这部的操作是将last之后的元素，覆盖到fisrt来
+  //返回值i为上图下部分，vector<T>::finish所指位置
+  iterator i = copy(last, finish, first);
+  //将i之后的元素析构
+  destroy(i, finish);
+  finish = finish - (last - first);
+  return first;
+}
+```
+
+**版本2 erase(position)**
+
+```c++
+//清除某个位置上的元素
+iterator erase(iterator position) {
+  //如果清除的不是尾元素之前的元素，需要将后面的数据覆盖上来
+  if (position + 1 != end())
+    copy(position + 1, finish, position);
+  --finish;
+  destroy(finish);
+  return position;
+}
+```
+
+> **4.clear()**
+
+```c++
+void clear(){erase(begin(), end());}
+```
+
+> **5.insert()**
+
+**实现过程：**
+
+前提：当n不等于0时，才能进行以下所有操作（n为新增元素的个数）
+
+- (1)：如果备用空间大于等于“新增元素个数”，计算插入点之后的现有元素个数
+  - (1-1)：如果“插入点之后的现有元素个数”大于“新增元素个数”
+    - 1.先将“插入点之后的现有元素”的后n个移动到finish之后
+    - 2.更新finish
+    - 3.再将“插入点之后的现有元素”剩下的前几个元素向后移动
+    - 4.将新加入的元素从“插入点”填入
+  - (1-2)：“插入点后的现有元素个数”小于等于“新增元素个数”
+    - 1.在“现有元素”之后先添加“新增元素个数”比“插入点后的现有元素个数”多的数 
+    - 2.更新finish
+    - 3.将“插入点后的现有元素”全部拷贝到新finish之后
+    - 4.更新finish
+    - 5.填入剩余“新增元素个数”
+- (2)：备用空间小于“新增元素个数”（那就必须配置额外的内存），首先决定新长度：旧长度的两倍，或旧长度+新增元素个数
+  - 1.配置新的vector空间
+  - 2.首先将旧vector的插入点之前的元素复制到新空间
+  - 3.再将新增元素（初值皆为n）填入新空间
+  - 4.最后将旧vector的插入点之后的元素赋值到新空间
+    - 如果有异常发生，实现“commit or rollback”语意
+    - 若新空间分配成功，清除并释放旧vector空间
+      - 更新start、finish
+
+[insert()的实现](STL源码剖析/vector-insert().md)
+
+**insert(position,n,x)**
+
+- (1)备用空间 2 >= 新增元素个数2
+  - (1-1)插入点之后的现有元素个数3 > 新增元素个数2
+
+![](../../pics/img-4-3b-1.png)
+
+- (1)备用空间 3 >= 新增元素个数3
+  - (1-2)插入点之后的现有元素个数2 <= 新增元素个数3
+
+![](../../pics/img-4-3b-2.png)
+
+- (2)备用空间2 < 新增元素个数3
+
+![](../../pics/img-4-3b-3.png)
+
+## 4.3 list
+
+### 4.3.1 list概述
+
+**优势**
+
+- 1.每次插入或删除一个元素，就配置或释放一个元素的空间，对空间的运用绝对的精准，一点也不浪费
+- 2.对于任何未知的元素的插入或元素移出，list永远是常数空间
+
+### 4.3.2 list的节点
+
+list本身和list的节点是不同的结构，需要分开设计
+
+STL list的节点（node）结构，是一个双向链表：
+
+```c++
+template <class T>
+struct __list_node{
+    typedef void* void_pointer;
+    //类型为void*，其实为__list_node<T>*
+    void_pointer prev;
+    void_pointer next;
+};
+```
+
+![image-20200414150047113](../../pics/image-20200414150047113.png)
+
+### 4.3.3 list的迭代器
+
+STL list是一个双向链表，迭代器必须具备前移、后移的能力，所以list提供的是一个**Bidirectional Iterators**
+
+**迭代器失效问题**
+
+- 1.插入操作（insert）、接合操作（splice）不会造成原有的list迭代器失效
+- 2.删除操作（erase）只有“指向被删除元素”的那个迭代器失效，其他迭代器不受影响
+
+![](../../pics/img-4-4.png)
+
+```c++
+template<class T, class Ref, class Ptr>
+struct __list_iterator {
+  typedef __list_iterator<T, T&, T*>             iterator;
+  typedef __list_iterator<T, const T&, const T*> const_iterator;
+  typedef __list_iterator<T, Ref, Ptr>           self;
+
+  //迭代器属于Bidirectional Iterators
+  typedef bidirectional_iterator_tag iterator_category;
+  typedef T value_type;
+  typedef Ptr pointer;
+  typedef Ref reference;
+  //节点指针类型link_type
+  typedef __list_node<T>* link_type;
+  typedef size_t size_type;
+  typedef ptrdiff_t difference_type;
+
+  //迭代器内部的指针，指向list的节点
+  link_type node;
+
+  //构造函数
+  __list_iterator(link_type x) : node(x) {}
+  __list_iterator() {}
+  __list_iterator(const iterator& x) : node(x.node) {}
+
+  bool operator==(const self& x) const { return node == x.node; }
+  bool operator!=(const self& x) const { return node != x.node; }
+  //对迭代器取值，取的是节点的数据值
+  reference operator*() const { return (*node).data; }
+
+  //以下是迭代器的成员存取运算子的标准做法
+  pointer operator->() const { return &(operator*()); }
+
+  //前置++，对迭代器累加1，就是前进一个节点
+  self& operator++() { 
+    node = (link_type)((*node).next);
+    return *this;
+  }
+  //后置++
+  self operator++(int) { 
+    self tmp = *this;
+    ++*this;
+    return tmp;
+  }
+
+  //前置--，对迭代器递减1，就是后退一个节点
+  self& operator--() { 
+    node = (link_type)((*node).prev);
+    return *this;
+  }
+  //后置--
+  self operator--(int) { 
+    self tmp = *this;
+    --*this;
+    return tmp;
+  }
+};
+```
+
+### 4.3.4 list的数据结构
+
+SGI list不仅是一个双向链表，还是一个**环状双向链表**。所以它只需要一个指针，便可完整表现整个链表： 
+
+```c++
+template <class T, class Alloc = alloc> //确实使用alloc为配置器
+class list {
+protected:
+    typedef __list_node<T> list_node;
+public:
+    typedef list_node* link_type;
+
+protected:
+    //只要一个指针，便可表示整个环状双向链表
+    //指向尾端的空白节点
+    link_type node; 
+};
+
+iterator begin() { return (link_type)((*node).next); }
+//end()就是那个空白节点
+iterator end() { return node; }
+size_type size() const {
+    size_type result = 0;
+    distance(begin(), end(), result);
+    return result;
+}
+```
+
+让指针指向刻意置于尾端的一个空白节点，node便能符合STL对于“前闭后开”`[)`区间的要求，称为last迭代器
+
+![image-20200414150448583](../../pics/image-20200414150448583.png)
+
+### 4.3.5 list的构造
+
+> 空间配置
+
+list缺省使用alloc作为空间分配器，并据此另外定义了一个list_node_allocator，为的是更方便以节点大小为配置单位： 
+
+```c++
+template <class T, class Alloc = alloc>
+class list {
+protected:
+    typedef simple_alloc<list_node, Alloc> list_node_allocator;
+...
+};
+```
+
+> 构造函数
+
+list提供许多构造函数，其中一个是默认构造函数，允许我们不指定任何参数做出一个空的list
+
+```c++
+public:
+list() { empty_initialize(); }
+
+protected:
+  void empty_initialize() { 
+    node = get_node();
+    node->next = node;
+    node->prev = node;
+  }
+```
+
+### 4.3.6 list的元素操作
+
+- 节点操作
+  - 分配一个节点：[get_node()](STL源码剖析/list-get_node().md)
+  - 释放一个节点：[put_node()](STL源码剖析/list-put_node().md)
+  - 产生（配置并构造）一个节点：[create_node()](STL源码剖析/list-create_node.md)
+  - 销毁（析构并释放）一个节点：[destroy_node()](STL源码剖析/list-destroy_node.md)
+  - 节点插入：
+    - [insert(position,x)](STL源码剖析/list-insert().md)：在迭代器position之前插入一个节点x
+    - [puch_back()](STL源码剖析/list-push_back().md)：插入一个节点，作为尾节点
+    - [push_front()](STL源码剖析/list-push_front().md)：插入一个节点，作为头节点
+  - 节点移除：
+    - [erase(position)](STL源码剖析/list-erase().md)：移除迭代器position所指节点，返回原position下一个节点的迭代器
+    - [pop_front()](STL源码剖析/list-pop_front().md)：移除头节点
+    - [pop_back()](STL源码剖析/list-pop_back().md)：移除尾节点
+    - [remove(value)](STL源码剖析/list-remove().md)：将数值为value的所有元素移除
+    - [unique()](STL源码剖析/list-unique().md)：移除数值相同的连续节点，注意，只有“连续而相同的元素”，才会被移除剩一个
+- 链表操作
+  - [list()](STL源码剖析/list-list().md)：list构造函数，创建一个空链表
+  - [clear()](STL源码剖析/list-clear().md)：清除所有节点（整个链表）
+  - [transfer(position,first,last)](STL源码剖析/list-transfer().md)：内部接口，迁移操作，将[first,last)内的所有元素移动到position之前
+    - [first,last)区间可以是同一list，也可以是不同list
+    - 该函数并非公开接口，list提供的接合操作是splice()
+  - [splice()](STL源码剖析/list-splice().md)：链表拼接，将一个list中的连续范围的元素移动到另一个（或同一个）list的某个定点，有三个重载形式。内部调用transfer()
+  - [merge()](STL源码剖析/list-merge().md)：将一个链表合并到另一个链表，两个链表的内容需先经过递增排序，合并后链表也是递增排序的
+  - [reverse()](STL源码剖析/list-reverse().md)：将链表逆向重置
+  - [sort()](STL源码剖析/list-sort().md)：list不能使用STL算法sort()，必须使用自己的sort()成员函数，因为STL算法sort()只接受RamdonAccessIterator。本函数采用快排
+
+## 4.4 deque
+
+### 4.4.1 deque概述
+
+deque是一种双向开口的连续线性空间，可以在头尾两端分别做元素的插入和删除操作
+
+**deque与vector的差异**：
+
+- 1.deque允许于常数时间内对起头端进行元素的插入或移除操作 
+- 2.deque没有所谓容量观念，因为它是动态地以分段连续空间组合而成，随时可以增加一段新的空间并链接起来（deque没有必要提供所谓的空间保留功能） 
+- 3.vector的迭代器是普通指针，但deque的迭代器不是，因此deque迭代器效率较低
+
+**对deque进行排序的建议**：为了最高效率，可将deque先完整复制到一个vector，将vector排序后（利用STL sort算法），再复制回deque
+
+### 4.4.2 deque的中控器
+
+deque系由一段一段的定量连续空间构成，一旦有必要在deque的前端或尾端增加新空间，便配置一段定量连续空间，串接在整个deque的头端或尾端。
+
+- **好处**：避开了“重新配置、复制、释放”的轮回（但map满了，仍然有这个过程）
+- **坏处**：复杂的迭代器架构
+
+deque采用一块所谓的map（注意，不是STL的map容器）作为主控，这里所谓的map是一小块连续空间，其中每个元素（此处称为一个节点，node）都是指针，指向另一端（较大的）连续线性空间，称为**缓冲区**。缓冲区才是deque的存储空间本身。SGI STL允许指定缓冲区大小，默认为0表示将使用512字节缓冲区
+
+```c++
+//BufSiz默认为0，表示512字节
+template <class T, class Alloc = alloc, size_t BufSiz = 0> 
+class deque {
+public:                         // Basic types
+  typedef T value_type;
+  typedef value_type* pointer;
+protected:                      // Internal typedefs
+  //元素的指针的指针，指向的map的指针类型
+  typedef pointer* map_pointer;
+  
+  //指向map，map是块连续空间，
+  //其内的每个元素都是一个指针（称为节点），指向一块缓冲区
+  //map是一个T**，即指针的指针
+  map_pointer map;
+  //map可以容纳多少指针  
+  size_type map_size;
+```
+
+![](../../pics/img-4-10.png)
+
+### 4.4.3 deque的迭代器
+
+deque是分段连续空间，维持其“整体连续”假象的任务，落在了迭代器的operator++和operator--两个运算身上
+
+迭代器必须完成的工作：
+
+- 1.必须能够指出分段连续空间（即缓冲区）在哪 
+- 2.必须能够判断自己是否已经处于其所在缓冲器的边缘。如果是，一旦前进或后退时就必须跳跃至下一个或上一个缓冲区
+- 3.为了能够正确跳跃，迭代器必须随时掌握中控器map 
+
+```c++
+template <class T, class Ref, class Ptr, size_t BufSiz>
+struct __deque_iterator {   //未继承std::iterator
+  typedef __deque_iterator<T, T&, T*, BufSiz>             iterator;
+  typedef __deque_iterator<T, const T&, const T*, BufSiz> const_iterator;
+  //buffer_size()用来决定缓冲区大小
+  static size_t buffer_size() {
+  //__deque_buf_size是一个全局函数，对该函数的解释如下：
+  //如果BufSiz不为0，传回BufSiz（个缓冲区），表示buffer size由用户自定义
+  //如果BufSiz为0，表示buffer size使用默认值，那么
+  //  如果sizeof(T)小于512，则传回 512/sizeof(T) （个缓冲区）
+  //  如果sizeof(T)不小于512，则传回1 （个缓冲区）
+  return __deque_buf_size(BufSiz, sizeof(T)); 
+  }
+
+  //未继承std::iterator，所以必须自行撰写5个必要的迭代器相应类型
+  typedef random_access_iterator_tag iterator_category; // (1)
+  typedef T value_type;                                 // (2)
+  typedef Ptr pointer;                                  // (3)
+  typedef Ref reference;                                // (4)
+  typedef size_t size_type;
+  typedef ptrdiff_t difference_type;                    // (5)
+  typedef T** map_pointer;
+
+  typedef __deque_iterator self;
+
+  //保持与容器的联结
+  T* cur;           //此迭代器所指缓冲区中的当前元素
+  T* first;         //此迭代器所指缓冲区的头
+  T* last;          //此迭代器所指缓冲区的尾(含备用空间)
+  map_pointer node; //指向中控器map
+...
+};
+```
+
+![](../../pics/img-4-11.png)
+
+- [set_node()](STL源码剖析/deque-set_node().md)：更新迭代器指向的缓冲区
+- [operator*()](STL源码剖析/deque-解引用函数.md)
+- [operator->()](STL源码剖析/deque-成员访问函数.md)
+- [operator-(x)](STL源码剖析/deque-operator-(x).md)：计算两个迭代器之间的距离
+- [operator++()](STL源码剖析/deque-operator++().md)和[operator++(int)](STL源码剖析/deque-operator++(int).md)
+- [operator--()](STL源码剖析/deque-operator--().md)和[operator--(int)](STL源码剖析/deque-operator--(int).md)
+- [operator+(n)](STL源码剖析/deque-operator+(n).md)
+- [operator+=(n)](STL源码剖析/deque-operator+=(n).md)：实现随机存取，迭代器可直接跳跃n个距离
+- [operator-(n)](STL源码剖析/deque-operator-(n).md)
+- [operator-=(n)](STL源码剖析/deque-operator-=(n).md)
+- [`operator[]()`](STL源码剖析/deque-operator[]().md)
+- [operator==()](STL源码剖析/deque-operator==().md)
+- [operator!=()](STL源码剖析/deque-operator!=().md)
+- [operator<()](STL源码剖析/deque-小于函数.md)
+
+### 4.4.4 deque的数据结构
+
+- 1.start、finish两个迭代器，分别指向第一缓冲区的第一个元素和最后缓冲区的最后一个元素（的下一个位置）
+- 2.map_size记住目前的map大小，一旦map提供的节点不足，就重新配置一块更大的map
+
+```c++
+template <class T, class Alloc = alloc, size_t BufSiz = 0> 
+class deque {
+public:                         // Basic types
+  typedef T value_type;
+  typedef value_type* pointer;
+  typedef const value_type* const_pointer;
+  typedef value_type& reference;
+  typedef const value_type& const_reference;
+  typedef size_t size_type;
+  typedef ptrdiff_t difference_type;
+    
+  typedef __deque_iterator<T, T&, T*, BufSiz>              iterator;
+  typedef __deque_iterator<T, const T&, const T&, BufSiz>  const_iterator;
+
+protected:                      // Internal typedefs
+  //元素的指针的指针，指向的map的指针类型
+  typedef pointer* map_pointer;
+
+protected:                      // Data members
+  iterator start;   //表现第一个节点
+  iterator finish;  //表现最后一个节点
+
+  map_pointer map;  //指向map，map是块连续空间
+                    //其每个元素都是个指针，指向一个节点（缓冲区）
+  size_type map_size; //map内有多少个指针
+
+```
+
+> [deque-数据结构相关函数](STL源码剖析/deque数据结构相关函数.md)
+
+- begin()：返回start迭代器
+- end()：返回finish迭代器
+- operator[]：调用迭代器的operator[]
+- front()：解引用start迭代器，获取start所指向的元素
+- back()：解引用finish迭代器的上一个迭代器，获取finish上一个元素
+- size()：计算元素个数
+- max_size()：可容纳最大元素个数，返回的是无限大`size_t(-1)`
+- empty()：判断容器是否为空
+
+### 4.4.5 deque的构造
+
+> 例子
+
+```c++
+deque<int,alloc,8> ideq(20,9);
+```
+
+其缓冲区大小为8（个元素，32字节），并令其保留20个元素空间，每个元素初值为9
+
+> 空间配置器
+
+deque自行定义了两个专属的空间配置器
+
+```c++
+protected:
+    //专属的空间分配器，每次分配一个元素大小，为分配元素准备
+    typedef simple_alloc<value_type,Alloc> data_allocator;
+    //专属的空间分配器，每次分配一个指针大小，为分配map中的指针准备
+    typedef simple_alloc<pointer,Alloc> map_allocator;
+```
+
+> [构造函数](STL源码剖析/deque-构造函数.md)
+
+提供一个构造函数
+
+```c++
+  deque(int n, const value_type& value)
+    : start(), finish(), map(0), map_size(0)
+  {
+    fill_initialize(n, value);
+  }
+```
+
+调用流程：
+
+```
+deque()
+	---> fill_initialize() //负责生产并安排好deque的结构，并将初值设定妥当
+		---> create_map_and_nodes() //负责产生并安排好deque的结构
+```
+
+### 4.4.6 deque的元素操作
+
+- 1.push_back()
+- 2.push_front()
+- 3.pop_back()
+- 4.pop_front()
+- 5.clear()：清除整个deque。注意：deque的最初状态（无任何元素时）保有一个缓冲区，因此clear()完之后恢复初始状态，也一样要保留一个缓冲区
+- 6.erase()：有两个重载版本，都采用覆盖方法
+  - erase(pos)：清除pos迭代器指向的元素，返回原pos之后的元素的迭代器
+  - erase(first,last)：清除[first,last)区间内的所有元素，返回原last指向的元素的迭代器
+- 7.insert(pos,x)：允许在pos之前插入一个元素x，返回新插入元素的迭代器
+
+[deque的元素操作](STL源码剖析/deque-元素操作)

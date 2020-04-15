@@ -48,7 +48,7 @@
 
 ## 2.3 网络
 
-- [计算机网络基本原理](notes/interview/network/计算机网络w基本原理.md)
+- [计算机网络基本原理](notes/interview/network/计算机网络基本原理.md)
 
 - [Unix网络编程](notes/interview/network/Unix网络编程.md)
 
