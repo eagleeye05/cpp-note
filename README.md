@@ -18,7 +18,7 @@
 
 - [计算机网络  自顶向下方法](notes/network/计算机网络.md)
 
-- [《UNIX网络编程:卷1》](notes/network/UNIX网络编程卷1.md)
+> [《UNIX网络编程:卷1》](notes/network/UNIX网络编程卷1.md)
 
 ## 1.3 操作系统
 
@@ -26,7 +26,7 @@
 
 - [操作系统 精髓与设计原理](notes/system/操作系统.md)
 
-- [Unix环境编程](notes/system/Unix环境编程.md)
+> [Unix环境编程](notes/system/Unix环境编程.md)
 
 > [Linux高性能服务器](notes/system/Linux高性能服务器.md)
 
@@ -56,12 +56,8 @@
 
 - [操作系统基本原理](notes/interview/system/操作系统基本原理.md)
 
-- [Linux内核](notes/interview/system/Linux内核.md)
-
 - [Unix环境编程](notes/interview/system/Unix环境编程.md)
 
 ## 2.5 其它
 
 - [bookmarks](notes/interview/bookmarks.md)
-
-  

@@ -1521,3 +1521,10 @@ deque()
 - 7.insert(pos,x)：允许在pos之前插入一个元素x，返回新插入元素的迭代器
 
 [deque的元素操作](STL源码剖析/deque-元素操作)
+
+## 4.5 stack
+
+### 4.5.1 stack概述
+
+- 先进先出
+- stack不允许有遍历行为
