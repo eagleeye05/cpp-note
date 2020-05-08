@@ -1,6 +1,6 @@
 ## 以advance()为例
 
-下面定义5个类，代表5个迭代器类型，用于函数重载。函数重载时必须加上一个类型已经确定的函数参数
+下面定义==5个类，代表5个迭代器类型==，用于==函数重载==。函数重载时必须加上==一个类型已经确定的函数参数==
 
 ```c++
 struct input_iterator_tag {};
@@ -47,7 +47,7 @@ inline void __advance(RandomAccessIterator& i, Distance n,
 }
 ```
 
-**注意**：最后一个参数只声明类型，并未指定参数名，因为它只是用来激活重载机制，函数中根本不使用该函数
+**注意**：最后一个参数只声明类型，并未指定参数名，因为它只是==用来激活重载机制==，函数中==根本不使用该函数==
 
 > 对外接口advance()
 
@@ -61,7 +61,7 @@ inline void advance(InputIterator& i, Distance n) {
 }
 ```
 
-**注意**：advance的第一个参数类型为InputIterator，这是STL算法的一个命名规则：以算法所能接受的最低阶迭代器类型，来为其迭代器类型参数命名
+**注意**：advance的第一个参数类型为InputIterator，这是==STL算法的一个命名规则：以算法所能接受的最低阶迭代器类型，来为其迭代器类型参数命名==
 
 > traits中的实现
 
@@ -95,7 +95,3 @@ struct iterator_traits<const T*> {
 > 消除“单纯传递调用的函数”
 
 __advance()函数的重载中，ForwardIterator版本的可以不实现（源码中确实没有实现）
-
-**例子**：
-
-![](../../../pics/language/STL源码剖析/img-3-消除单纯传递调用的函数的例子.png)

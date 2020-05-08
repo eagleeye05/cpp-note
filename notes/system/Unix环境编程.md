@@ -2,6 +2,12 @@
 | :----------------------------------------------------------: | :-------------------: | :----------------------------------------: | :------------------------------------: | :----------------------------------------------------------: |
 | [一.文件I/O](#ch1)<br>[三.标准I/O库](#ch3)<br>[八.高级I/O](#ch8) | [二.文件和目录](#ch2) | [四.进程环境](#ch4)<br>[五.进程控制](#ch5) | [六.线程](#ch6)<br>[七.线程控制](#ch7) | [九.进程间通信](#ch9)<br>[十.信号](../interview/temp/信号.md) |
 
+
+
+
+
+
+
 <br><br>
 
 ![img](../../pics/apue-basic-1.png)
@@ -6677,45 +6683,17 @@ POSIX.1通过[fcntl函数](#27-fcntl函数)提供记录锁功能
 
 第三个参数是一个指向`flock结构`的指针：
 
-1
-
 ```
 struct flock{
-```
-
-2
-
-```
     short l_type;    /* F_RDLCK,F_WRLCK,or F_UNLCK */
-```
 
-3
-
-```
     short l_whence;  /* SEEK_SET,SEEK_CUR,or SEEK_END */
-```
 
-4
-
-```
     off_t l_start;   /* offset in bytes,relative to l_whence */
-```
 
-5
-
-```
     off_t l_len;     /* length, in bytes; 0 means lock to EOF */
-```
 
-6
-
-```
     pid_t l_pid;     /* returned with F_GETLK */
-```
-
-7
-
-```
 };
 ```
 

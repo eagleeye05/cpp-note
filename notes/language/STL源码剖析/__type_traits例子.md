@@ -29,7 +29,7 @@ inline ForwardIterator __uninitialized_fill_n(ForwardIterator first, Size n,
   return __uninitialized_fill_n_aux(first, n, x, is_POD());               
 }
 
-//__uninitialized_copy_aux(...,__true_type)
+//__uninitialized_copy_aux(...,__true_type),__true_type为结构体，便于进行重载
 template <class InputIterator, class ForwardIterator>
 inline ForwardIterator 
 __uninitialized_copy_aux(InputIterator first, InputIterator last, ForwardIterator result, __true_type) {

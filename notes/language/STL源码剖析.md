@@ -41,7 +41,7 @@ GNU**(音译为“革奴”)，代码**G**U**N is **N**ot **U**nix。GNU计划�
 
 **版本**：cygnus c++ 2.91.57 for windows
 
-在[g++/下有128个文件，在g++/std下有8个文件
+在g++/下有128个文件，在g++/std下有8个文件
 
 #### 1.8.2 SGI STL文件分布与简介
 
@@ -137,7 +137,7 @@ GNU**(音译为“革奴”)，代码**G**U**N is **N**ot **U**nix。GNU计划�
 
 有时候刻意制造一些临时对象，刻意使程序干净清爽
 
-刻意制造临时对象的**方法**是：在类型别名之后直接加上一堆小括号，并可指定初值，**例如**：`Shape(5,3)`或`int(8)`。其**意义**相当于调用相应的构造函数且不指定对象名称
+刻意制造临时对象的**方法**是：在类型别名之后直接加上一堆小括号，并可指定初值，**例如**：`Shape(5,3)`或`int(8)`。其**意义**相当于调用相应的==构造函数且不指定对象名称==
 
 STL最常将此技巧用于**仿函数**与**算法**的搭配上，例如：
 
@@ -306,7 +306,7 @@ STL标准规定分配器定义于`<memory>`中，SGI`<memory>`内含两个文件
      - 有用的析构函数：遍历析构
      - 无用的析构函数：什么也不做
 
-**注意**：STL规定分配器必须拥有 名为construct()和destroy()的两个成员函数，然而SGI特殊空间分配器std::alloc并未遵守这一规则，所以实际这部分属于STL allocator，但不属于std::alloc。即，SGI特殊的空间分配器std::alloc不包含”2.2.3  造和析构基本工具：construct()和destroy()“，只包含”2.2.4 空间的配置与释放，std::alloc“
+**注意**：STL规定分配器必须拥有名为construct()和destroy()的两个成员函数，然而SGI特殊空间分配器std::alloc并未遵守这一规则，所以实际这部分属于STL allocator，但不属于std::alloc。即，SGI特殊的空间分配器std::alloc不包含”2.2.3  造和析构基本工具：construct()和destroy()“，只包含”2.2.4 空间的配置与释放，std::alloc“
 
 #### 2.2.4 空间的配置与释放alloc
 
@@ -529,7 +529,7 @@ inline ForwardIterator
 - 2.迭代器last：指向输入端的结束位置（前闭后开区间）
 - 3.迭代器result：指向输出端（欲初始化空间）的起始处
 
-uninitialized_copy将内存的配置与对象的构建分离开（本函数完成“构造行为”），如果作为输出目的地的[result, result+(last-first))范围内的每一个迭代器i都未初始化，该函数会调用`construct(&*(result+(i-first)),*i)`，产生*i的复制品，放置于输出范围的相对位置上
+uninitialized_copy将==内存的配置与对象的构建分离开==（本函数完成“构造行为”），如果作为输出目的地的[result, result+(last-first))范围内的每一个迭代器i都未初始化，该函数会调用`construct(&*(result+(i-first)),*i)`，产生*i的复制品，放置于输出范围的相对位置上
 
 uninitialized_copy的**用处**：容器的全区间构造函数通常调用该函数完成，具体过程如下：
 
@@ -617,9 +617,9 @@ iterator模式定义：提供一种方法，使之能够一次寻访某个容器
 
 迭代器是一种“智能指针”
 
-STL容器都提供专属迭代器
+STL容器==都提供专属迭代器==
 
-迭代器最重要的编程工作是对operator*（解引用）和operator->（成员访问）进行重载
+迭代器最重要的编程工作是对==operator*（解引用）和operator->（成员访问）==进行重载
 
 ### 3.3 迭代器相应类别
 
@@ -630,11 +630,11 @@ STL容器都提供专属迭代器
 解决办法：
 
 - 1. 函数模板的参数推导机制
-     - 缺点：无法用于函数的返回类型声明
+     - 缺点：无法用于函数的==返回类型声明==
 - 2. 声明内嵌类型
-     - 缺点：无法用于非类类型，如原生指针。因为费类类型无法声明内嵌类型
+     - 缺点：==无法用于非类类型，如原生指针==。因为非类类型无法声明内嵌类型
 - 3. 偏特化
-     - 优点：解决非类类型的”相应类别“萃取
+     - 优点：解决==非类类型的”相应类别“萃取==
 
 下面对这三个办法进行详细说明
 
@@ -644,30 +644,30 @@ STL容器都提供专属迭代器
 
 编译器自动进行template参数推导，于是导出类别T，解决了问题
 
-**缺点**：迭代器所指对象的类别，称为该迭代器的value type。该方法无法将value type用于返回值类型的声明。函数的“模板推导机制”只能推导函数，无法推导函数的返回值类别
+**缺点**：==迭代器所指对象的类别，称为该迭代器的value type==。该方法无法将value type用于返回值类型的声明。函数的“模板推导机制”==只能推导函数，无法推导函数的返回值类别==
 
 > 2. 声明内嵌类型
 
 ![image-20200410001539681](../../pics/image-20200410001539681.png)
 
-**注意：**func()的返回类别必须加上关键字typename，因为T是一个模板参数，在它编译器具现化之前，编译器对T一无所知，编译器此时并不知道`MyIter<T>::value_type`代表的是一个类别或是一个成员函数或数据成员。关键字typename的用意在于告诉编译器这是一个类别，如此才能顺利通过编译
+**注意：**func()的==返回类别必须加上关键字typename==，因为T是一个模板参数，在它==编译器具现化之前==，编译器对T一无所知，编译器此时并不知道`MyIter<T>::value_type`代表的是==一个类别或是一个成员函数或数据成员==。关键字typename的用意在于告诉编译器这是一个类别，如此==才能顺利通过编译==
 
-**缺点**：并不是所有的迭代器都是类类型，原生指针就不是。如果不是类类型，就无法为它定义内嵌类别。但STL绝对必须接受原生指针作为一种迭代器
+**缺点**：并==不是所有的迭代器都是类类型==，原生指针就不是。如果不是类类型，就==无法为它定义内嵌类别==。但STL绝对必须接受原生指针作为一种迭代器
 
 > 3. 偏特化
 
 解决**非类类型的迭代器**的**相应类别**的萃取
 
-- 指针令迭代器的模板参数为指针，设计特化版本的迭代器
-- 针对**指向常数对象的指针**，设计特化版本的迭代器
+- 指针令迭代器的模板参数为指针，设计==特化版本的迭代器==
+- 针对**指向常数对象的指针**，设计==特化版本的迭代器==
 
 ### 3.4 Traits编程技法
 
-使用3.3节提到的后两种方法实现`iterator_traits`类，该类专门用来“萃取”迭代器的特性
+使用3.3节提到的后两种方法实现`iterator_traits`类，该类专门用来==“萃取”迭代器的特性==
 
 > 常用的迭代器相应类别
 
-最常用的迭代器相应类别有五种：value_type, difference_type, pointer, reference, iterator, iterator_category，如果你希望你开发的容器与STL水乳交融，一定要为你的迭代器定义这五种相应类别。“特性萃取机“traits会很忠实的的将原汁原味榨取出来
+最常用的迭代器相应类别有五种：value_type, difference_type, pointer, reference, iterator, iterator_category，如果你希望你开发的容器与STL水乳交融，一定要为你的迭代器定义这五种相应类别。==“特性萃取机“traits==会很忠实的的将原汁原味榨取出来
 
 > Traits的实现
 
@@ -719,20 +719,20 @@ func(I) {
 
 > **1.value type**
 
-**作用**：value type是指迭代器所指的对象
+**作用**：value type是指迭代器所指的==对象==
 
 > **2.difference type**
 
-**作用**：difference type用来表示两个迭代器之间的距离，也可用来表示一个**容器的最大容量**
+**作用**：difference type用来表示两个迭代器之间的==距离==，也可用来表示一个**容器的最大容量**
 
-**例子**：一个泛型算法提供计数功能，例如STL的**count()**，其传回值就必须使用迭代器的**diffrence type**
+**例子**：一个泛型算法提供==计数功能==，例如STL的**count()**，其传回值就必须使用迭代器的**diffrence type**
 
 ```c++
 template<class I, class T>
 typename iterator_traits<I>::difference_type count(){}
 ```
 
-**特例化**：原生指针和“指向常数对象的指针”的difference_type都为C++内建的**ptrdiff_t**（定义于<cstddef>头文件）
+**特例化**：原生指针和“指向常数对象的指针”的difference_type都为C++内建的==**ptrdiff_t**==（定义于<cstddef>头文件）
 
 > **3.reference type**
 
@@ -743,7 +743,7 @@ typename iterator_traits<I>::difference_type count(){}
 - 2.**mutable iterators**：允许改变“所指对象之内容”的迭代器
   - 如`int* pi;`
 
-函数如果要传回左值，都是以传引用的方式进行
+函数如果要==传回左值==，都是以==传引用==的方式进行
 
 - 当p是一个mutable iterators时，如果value type是T，那么*p的reference type为T&
 - 当p是一个constant iterators时，如果value type是T，那么*p的reference type为const T&
@@ -812,7 +812,7 @@ STL只对迭代器加以规范，指定出**iterator_traits**。SGI把这种技�
 - **iterator_traits**：负责萃取 **迭代器** 的特性
 - **_type_traits**：负责萃取 **类型** 的特性
 
-**__type_traits萃取的类型特性有**：
+**__type_traits萃取的==类型特性==有**：
 
 - 1.是否具备“有用的默认构造函数”（non-trivial default constructor）
 - 2.是否具备“有用的拷贝构造函数”（non-trivial copy constructor）
@@ -902,7 +902,7 @@ template<> struct __type_traits<Shape> {...}
 
 如果你是SGI STL用户，可以在自己的程序中充分运用__type_traits
 
-假设定义了一个Shap类，如果想要使用`__type_traits`，则必须定义`__type_traits`关于Shape的特化版本
+假设定义了一个Shape类，如果想要使用`__type_traits`，则必须定义`__type_traits`关于Shape的特化版本
 
 ```c++
 template<> struct __type_traits<Shape> {...}
@@ -912,20 +912,22 @@ template<> struct __type_traits<Shape> {...}
 
 ![image-20200411202016588](../../pics/image-20200411202016588.png)
 
-### 4.2.1 vector概述
+### 4.2 vector
+
+#### 4.2.1 vector概述
 
 array和vector的**区别**：空间运用的灵活性
 
 - 1. array是静态空间，一旦配置就不能更改
 - 2. vector是动态空间，随着元素的加入，它的内部机制会自动扩充空间以容纳新元素
 
-### 4.2.2 vector定义摘要
+#### 4.2.2 vector定义摘要
 
 STL规定，与使用vector必须先包含`<vector>`，但SGI STL将vector的实现于更底层的`<stl_vector.h>`
 
 [vector的定义](STL源码剖析/vector.md)
 
-### 4.2.3 vector的迭代器
+#### 4.2.3 vector的迭代器
 
 vector的迭代器就是普通指针，因为：
 
@@ -955,7 +957,7 @@ vector<int>::iterator ivite;
 vector<int>::iterator svite;
 ```
 
-### 4.2.4 vector的数据结构
+#### 4.2.4 vector的数据结构
 
 > 数据结构
 
@@ -991,7 +993,7 @@ public:
 
 ![image-20200413101144672](../../pics/image-20200413101144672.png)
 
-### 4.2.6 vector的元素操作
+#### 4.2.6 vector的元素操作
 
 - 1.push_back
 - 2.pop_back
@@ -1127,16 +1129,16 @@ void clear(){erase(begin(), end());}
 
 ![](../../pics/img-4-3b-3.png)
 
-## 4.3 list
+### 4.3 list
 
-### 4.3.1 list概述
+#### 4.3.1 list概述
 
 **优势**
 
 - 1.每次插入或删除一个元素，就配置或释放一个元素的空间，对空间的运用绝对的精准，一点也不浪费
 - 2.对于任何未知的元素的插入或元素移出，list永远是常数空间
 
-### 4.3.2 list的节点
+#### 4.3.2 list的节点
 
 list本身和list的节点是不同的结构，需要分开设计
 
@@ -1154,7 +1156,7 @@ struct __list_node{
 
 ![image-20200414150047113](../../pics/image-20200414150047113.png)
 
-### 4.3.3 list的迭代器
+#### 4.3.3 list的迭代器
 
 STL list是一个双向链表，迭代器必须具备前移、后移的能力，所以list提供的是一个**Bidirectional Iterators**
 
@@ -1224,7 +1226,7 @@ struct __list_iterator {
 };
 ```
 
-### 4.3.4 list的数据结构
+#### 4.3.4 list的数据结构
 
 SGI list不仅是一个双向链表，还是一个**环状双向链表**。所以它只需要一个指针，便可完整表现整个链表： 
 
@@ -1256,7 +1258,7 @@ size_type size() const {
 
 ![image-20200414150448583](../../pics/image-20200414150448583.png)
 
-### 4.3.5 list的构造
+#### 4.3.5 list的构造
 
 > 空间配置
 
@@ -1287,7 +1289,7 @@ protected:
   }
 ```
 
-### 4.3.6 list的元素操作
+#### 4.3.6 list的元素操作
 
 - 节点操作
   - 分配一个节点：[get_node()](STL源码剖析/list-get_node().md)
@@ -1315,9 +1317,9 @@ protected:
   - [reverse()](STL源码剖析/list-reverse().md)：将链表逆向重置
   - [sort()](STL源码剖析/list-sort().md)：list不能使用STL算法sort()，必须使用自己的sort()成员函数，因为STL算法sort()只接受RamdonAccessIterator。本函数采用快排
 
-## 4.4 deque
+### 4.4 deque
 
-### 4.4.1 deque概述
+#### 4.4.1 deque概述
 
 deque是一种双向开口的连续线性空间，可以在头尾两端分别做元素的插入和删除操作
 
@@ -1329,7 +1331,7 @@ deque是一种双向开口的连续线性空间，可以在头尾两端分别做
 
 **对deque进行排序的建议**：为了最高效率，可将deque先完整复制到一个vector，将vector排序后（利用STL sort算法），再复制回deque
 
-### 4.4.2 deque的中控器
+#### 4.4.2 deque的中控器
 
 deque系由一段一段的定量连续空间构成，一旦有必要在deque的前端或尾端增加新空间，便配置一段定量连续空间，串接在整个deque的头端或尾端。
 
@@ -1359,7 +1361,7 @@ protected:                      // Internal typedefs
 
 ![](../../pics/img-4-10.png)
 
-### 4.4.3 deque的迭代器
+#### 4.4.3 deque的迭代器
 
 deque是分段连续空间，维持其“整体连续”假象的任务，落在了迭代器的operator++和operator--两个运算身上
 
@@ -1421,7 +1423,7 @@ struct __deque_iterator {   //未继承std::iterator
 - [operator!=()](STL源码剖析/deque-operator!=().md)
 - [operator<()](STL源码剖析/deque-小于函数.md)
 
-### 4.4.4 deque的数据结构
+#### 4.4.4 deque的数据结构
 
 - 1.start、finish两个迭代器，分别指向第一缓冲区的第一个元素和最后缓冲区的最后一个元素（的下一个位置）
 - 2.map_size记住目前的map大小，一旦map提供的节点不足，就重新配置一块更大的map
@@ -1466,7 +1468,7 @@ protected:                      // Data members
 - max_size()：可容纳最大元素个数，返回的是无限大`size_t(-1)`
 - empty()：判断容器是否为空
 
-### 4.4.5 deque的构造
+#### 4.4.5 deque的构造
 
 > 例子
 
@@ -1508,7 +1510,7 @@ deque()
 		---> create_map_and_nodes() //负责产生并安排好deque的结构
 ```
 
-### 4.4.6 deque的元素操作
+#### 4.4.6 deque的元素操作
 
 - 1.push_back()
 - 2.push_front()
@@ -1522,9 +1524,9 @@ deque()
 
 [deque的元素操作](STL源码剖析/deque-元素操作)
 
-## 4.5 stack
+### 4.5 stack
 
-### 4.5.1 stack概述
+#### 4.5.1 stack概述
 
 - 先进先出
 - stack不允许有遍历行为
