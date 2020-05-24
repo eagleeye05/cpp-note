@@ -22,11 +22,9 @@
 
 ## 1.3 操作系统
 
-> [Linux常用命令](notes/system/Linux常用命令.md)
-
 - [操作系统 精髓与设计原理](notes/system/操作系统.md)
 
-> [Unix环境编程](notes/system/Unix环境编程.md)
+> [Unix环境编程](https://github.com/arkingc/note/blob/master/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/UNIX%E7%8E%AF%E5%A2%83%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md)
 
 > [Linux高性能服务器](notes/system/Linux高性能服务器.md)
 
@@ -50,7 +48,7 @@
 
 > [计算机网络基本原理](notes/interview/network/计算机网络基本原理.md)
 
-> [Unix网络编程](notes/interview/network/Unix网络编程.md)
+> [Unix网络编程](https://github.com/arkingc/note/blob/master/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/UNIX%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%8D%B71.md)
 
 ## 2.4 操作系统
 
@@ -60,12 +58,13 @@
 
 ## 2.5 其它
 
+> [Linux常用命令](notes/system/Linux常用命令.md)
+
 > [bookmarks](notes/interview/bookmarks.md)
 
-
+***参考：***
 
 [arking / note]:https://github.com/arkingc/note
 [guanjunjian / Interview-Summary]: https://github.com/guanjunjian/Interview-Summary
 [selfboot / CS_Offer]:https://github.com/selfboot/CS_Offer
 [CyC2018/CS-Notes]:https://github.com/CyC2018/CS-Notes
-
