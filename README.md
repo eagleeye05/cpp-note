@@ -18,11 +18,11 @@
 
 - [计算机网络  自顶向下方法](notes/network/计算机网络.md)
 
-> [《UNIX网络编程:卷1》](notes/network/UNIX网络编程卷1.md)
+> [UNIX网络编程:卷1](https://github.com/arkingc/note/blob/master/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/UNIX%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%8D%B71.md)
 
 ## 1.3 操作系统
 
-- [操作系统 精髓与设计原理](notes/system/操作系统.md)
+- [操作系统 精髓与设计原理](notes/system/操作系统.md)  ==已完成==
 
 > [Unix环境编程](https://github.com/arkingc/note/blob/master/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/UNIX%E7%8E%AF%E5%A2%83%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md)
 
@@ -30,9 +30,9 @@
 
 ## 1.4 C++
 
-> [C++ Primer](notes/language/C++ Primer.md)
+- [C++ Primer](notes/language/C++ Primer.md)
 
-> [STL源码剖析](notes/language/STL源码剖析.md)
+- [STL源码剖析](notes/language/STL源码剖析.md)   ==已完成==
 
 > [深入理解C++对象模型](notes/language/深入理解C++对象模型.md)
 
@@ -42,7 +42,7 @@
 
 ## 2.2  C++
 
-> [C++ ](notes/interview/language/C++.md)  
+- [C++ ](notes/interview/language/C++.md)  
 
 ## 2.3 网络
 

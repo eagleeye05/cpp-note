@@ -134,7 +134,9 @@
 
 - [深入理解C++的动态绑定和静态绑定 - 常高伟的专栏 - CSDN博客](http://m.blog.csdn.net/chgaowei/article/details/6427731)
 
-- [C++模板元编程（C++ template metaprogramming） - 文章 - 伯乐在线](http://blog.jobbole.com/83461/)
+- ==[C++模板元编程（C++ template metaprogramming） - 文章 - 伯乐在线](http://blog.jobbole.com/83461/)==
+
+  > 模板的基础知识，包含模板编译和分离模板编译的区别，但未深入C++模板元编程层次
 
 - [C++后台开发校招面试常见问题 - oscarwin - CSDN博客](http://m.blog.csdn.net/shanghairuoxiao/article/details/72876248)
 
@@ -364,20 +366,18 @@
 
 - [Manacher算法--O（n）回文子串算法 - xuanflyer - CSDN博客](http://m.blog.csdn.net/ggggiqnypgjg/article/details/6645824)
 
-- [【转】二叉树、B树、B-树、B+树、B*树 - zhzhang - 博客园](http://transcoder.baiducontent.com/from=2001a/bd_page_type=1/ssid=0/uid=0/pu=usm%403%2Csz%401320_2003%2Cta%40iphone_1_10.3_1_11.6/baiduid=F8EB1922487B57E4B9B568A60C98DEC3/w=0_10_/t=iphone/l=3/tc?ref=www_iphone&lid=11323507255059474430&order=5&fm=alhm&h5ad=1&srd=1&dict=32&tj=h5_mobile_5_0_10_title&w_qd=IlPT2AEptyoA_yi8mgBQ&sec=23976&di=dc52c591f2efaf05&bdenc=1&tch=124.417.302.1209.1.403&nsrc=IlPT2AEptyoA_yixCFOxXnANedT62v3IEQGG_ytK1DK6mlrte4viZQRASDfpKHaMJICb9n00sqcIxn7c_G1e6so4g43&eqid=9d252dda9d60e8001000000559bb2586&wd=&clk_info={"srcid"%3A"1599"%2C"tplname"%3A"h5_mobile"%2C"t"%3A1505437070391%2C"sig"%3A"7417"%2C"xpath"%3A"div-a-h3"})
+- [【转】二叉树、B树、B-树、B+sheji树、B*树 - zhzhang - 博客园](http://transcoder.baiducontent.com/from=2001a/bd_page_type=1/ssid=0/uid=0/pu=usm%403%2Csz%401320_2003%2Cta%40iphone_1_10.3_1_11.6/baiduid=F8EB1922487B57E4B9B568A60C98DEC3/w=0_10_/t=iphone/l=3/tc?ref=www_iphone&lid=11323507255059474430&order=5&fm=alhm&h5ad=1&srd=1&dict=32&tj=h5_mobile_5_0_10_title&w_qd=IlPT2AEptyoA_yi8mgBQ&sec=23976&di=dc52c591f2efaf05&bdenc=1&tch=124.417.302.1209.1.403&nsrc=IlPT2AEptyoA_yixCFOxXnANedT62v3IEQGG_ytK1DK6mlrte4viZQRASDfpKHaMJICb9n00sqcIxn7c_G1e6so4g43&eqid=9d252dda9d60e8001000000559bb2586&wd=&clk_info={"srcid"%3A"1599"%2C"tplname"%3A"h5_mobile"%2C"t"%3A1505437070391%2C"sig"%3A"7417"%2C"xpath"%3A"div-a-h3"})
 
 - [设计模式 之 单例模式 (C++ 懒汉经典实现 & DCL实现 & 饿汉经典实现) - 柠檬不加糖的博客 - CSDN博客](http://m.blog.csdn.net/u013575812/article/details/50989966)
 
 - [C++中的单例模式 - Hackbuteer1的专栏 - CSDN博客](http://m.blog.csdn.net/hackbuteer1/article/details/7460019)
 
-- [【C/C++】对于可重入、线程安全、异步信号安全几个概念的理解 - ZhangPY的专栏 - CSDN博客](http://m.blog.csdn.net/lg1259156776/article/details/52732879)
+- ==[【C/C++】对于可重入、线程安全、异步信号安全几个概念的理解 - ZhangPY的专栏 - CSDN博客](http://m.blog.csdn.net/lg1259156776/article/details/52732879)==
+
+> 线程安全，异步信号安全，可重入函数之间的关系
 
 - [B树、B-树、B+树、B*树详解（转） - 憨熊之家 - 博客园](http://www.cnblogs.com/czzju/archive/2013/02/14/2911190.html)
-
 - [红黑树(一)之 原理和算法详细介绍 - 如果天空不死 - 博客园](http://www.cnblogs.com/skywang12345/p/3245399.html)
-
 - [分布式锁的三种实现方式 - - ITeye技术网站](http://surlymo.iteye.com/blog/2082684)
-
 - [平衡二叉树详解 - zhangbaochong - 博客园](http://www.cnblogs.com/zhangbaochong/p/5164994.html)
-
 - [n个数中任意两个异或最大值](http://m.blog.csdn.net/article/details?id=52717078)
